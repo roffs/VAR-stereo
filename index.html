@@ -31,10 +31,14 @@ for alternative installations -->
 
         viewMatrix(eye) {
           // to be written by you!
-          var viewDir = this.u.cross(this.v);
+          var viewDir = new THREE.Vector3();
+          viewDir.crossVectors(this.v, this.u).normalize();
 
-          var target = new THREE.Vector3(0, 0, 0);
+          var target = new THREE.Vector3();
+          target.addVectors(eye, viewDir);
+
           var upVector = this.v;
+          upVector.normalize();
           var mat = new THREE.Matrix4();
           mat = mat.lookAt(eye, target, upVector); // this lookAt version creates only a rotation matrix
           var translate = new THREE.Matrix4().makeTranslation(
@@ -43,6 +47,7 @@ for alternative installations -->
             -eye.z
           );
           mat = mat.multiplyMatrices(mat, translate);
+
           return mat;
         }
 
@@ -241,25 +246,36 @@ for alternative installations -->
         );
         displaySurfaces.push(leftScreen);
 
-        // to be completed by you
-
         // RIGHT SCREEN
-        var right_screen = new DisplaySurface(
+        var rightScreen = new DisplaySurface(
           "Right",
           new THREE.Vector3(150.0, -150.0, -150.0),
           new THREE.Vector3(0.0, 0.0, 300.0),
           new THREE.Vector3(0.0, 300.0, 0.0)
         );
-        displaySurfaces.push(right_screen);
+        displaySurfaces.push(rightScreen);
+
+        console.log(
+          "Front: ",
+          frontScreen.viewMatrix(new THREE.Vector3(50, 20, 100))
+        );
+        console.log(
+          "Right: ",
+          rightScreen.viewMatrix(new THREE.Vector3(50, 20, 100))
+        );
+        console.log(
+          "Left: ",
+          leftScreen.viewMatrix(new THREE.Vector3(50, 20, 100))
+        );
 
         // FLOOR SCREEN
-        var floor_screen = new DisplaySurface(
+        var floorScreen = new DisplaySurface(
           "Floor",
           new THREE.Vector3(-150.0, -150.0, 150.0),
           new THREE.Vector3(300.0, 0.0, 0.0),
           new THREE.Vector3(0.0, 0.0, -300.0)
         );
-        displaySurfaces.push(floor_screen);
+        displaySurfaces.push(floorScreen);
       }
 
       function getLeftEyePosition() {
