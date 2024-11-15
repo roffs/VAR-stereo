@@ -30,15 +30,14 @@ for alternative installations -->
         }
 
         viewMatrix(eye) {
-          // to be written by you!
           var viewDir = new THREE.Vector3();
           viewDir.crossVectors(this.v, this.u).normalize();
 
           var target = new THREE.Vector3();
           target.addVectors(eye, viewDir);
 
-          var upVector = this.v;
-          upVector.normalize();
+          var upVector = this.v.clone().normalize();
+
           var mat = new THREE.Matrix4();
           mat = mat.lookAt(eye, target, upVector); // this lookAt version creates only a rotation matrix
           var translate = new THREE.Matrix4().makeTranslation(
@@ -52,12 +51,23 @@ for alternative installations -->
         }
 
         projectionMatrix(eye, znear, zfar) {
-          // to be written by you!
+          var viewMatrix = this.viewMatrix(eye);
 
-          var left = -1;
-          var right = 1;
-          var bottom = -1;
-          var top = 1;
+          var min = this.origin.clone();
+          var max = this.origin.clone().add(this.u).add(this.v);
+
+          min.applyMatrix4(viewMatrix);
+          max.applyMatrix4(viewMatrix);
+
+          const calc_in_znear = (value) => {
+            return (value * znear) / -max.z;
+          };
+
+          var right = calc_in_znear(max.x);
+          var left = calc_in_znear(min.x);
+          var top = calc_in_znear(max.y);
+          var bottom = calc_in_znear(min.y);
+
           return new THREE.Matrix4().makePerspective(
             left,
             right,
@@ -255,18 +265,31 @@ for alternative installations -->
         );
         displaySurfaces.push(rightScreen);
 
-        console.log(
-          "Front: ",
-          frontScreen.viewMatrix(new THREE.Vector3(50, 20, 100))
-        );
-        console.log(
-          "Right: ",
-          rightScreen.viewMatrix(new THREE.Vector3(50, 20, 100))
-        );
-        console.log(
-          "Left: ",
-          leftScreen.viewMatrix(new THREE.Vector3(50, 20, 100))
-        );
+        // console.log(
+        //   "Front: ",
+        //   frontScreen.viewMatrix(new THREE.Vector3(50, 20, 100))
+        // );
+        // console.log(
+        //   "Right: ",
+        //   rightScreen.viewMatrix(new THREE.Vector3(50, 20, 100))
+        // );
+        // console.log(
+        //   "Left: ",
+        //   leftScreen.viewMatrix(new THREE.Vector3(50, 20, 100))
+        // );
+
+        // console.log(
+        //   "FRONT: ",
+        //   frontScreen.projectionMatrix(new THREE.Vector3(50, 20, 100), 0.1, 100)
+        // );
+        // console.log(
+        //   "RIGHT: ",
+        //   rightScreen.projectionMatrix(new THREE.Vector3(50, 20, 100), 0.1, 100)
+        // );
+        // console.log(
+        //   "LEFT: ",
+        //   leftScreen.projectionMatrix(new THREE.Vector3(50, 20, 100), 0.1, 100)
+        // );
 
         // FLOOR SCREEN
         var floorScreen = new DisplaySurface(
