@@ -36,7 +36,9 @@ for alternative installations -->
           var target = new THREE.Vector3();
           target.addVectors(eye, viewDir);
 
-          var upVector = this.v.clone().normalize();
+          var upVector = this.v.clone().normalize().multiplyScalar(-1.0);
+
+          console.log(this.name, " UP vector: ", upVector);
 
           var mat = new THREE.Matrix4();
           mat = mat.lookAt(eye, target, upVector); // this lookAt version creates only a rotation matrix
@@ -265,18 +267,18 @@ for alternative installations -->
         );
         displaySurfaces.push(rightScreen);
 
-        // console.log(
-        //   "Front: ",
-        //   frontScreen.viewMatrix(new THREE.Vector3(50, 20, 100))
-        // );
-        // console.log(
-        //   "Right: ",
-        //   rightScreen.viewMatrix(new THREE.Vector3(50, 20, 100))
-        // );
-        // console.log(
-        //   "Left: ",
-        //   leftScreen.viewMatrix(new THREE.Vector3(50, 20, 100))
-        // );
+        console.log(
+          "Front: ",
+          frontScreen.viewMatrix(new THREE.Vector3(50, 20, 100))
+        );
+        console.log(
+          "Right: ",
+          rightScreen.viewMatrix(new THREE.Vector3(50, 20, 100))
+        );
+        console.log(
+          "Left: ",
+          leftScreen.viewMatrix(new THREE.Vector3(50, 20, 100))
+        );
 
         // console.log(
         //   "FRONT: ",
