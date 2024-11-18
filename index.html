@@ -393,13 +393,13 @@ for alternative installations -->
           }
 
           // restore state
-          xrrenderer.setRenderTarget(xrrenderer.getRenderTarget().left);
+          xrrenderer.setRenderTarget(xrrenderer.getRenderTarget());
           xrrenderer.setClearColor(0x000000);
-          xrrenderer.render(displaySurfaceScene, xrcamera.cameraL);
+          xrrenderer.render(displaySurfaceScene, xrcamera);
 
-          xrrenderer.setRenderTarget(xrrenderer.getRenderTarget().right);
-          xrrenderer.setClearColor(0x000000);
-          xrrenderer.render(displaySurfaceScene, xrcamera.cameraR);
+          // xrrenderer.setRenderTarget(xrrenderer.getRenderTarget().right);
+          // xrrenderer.setClearColor(0x000000);
+          // xrrenderer.render(displaySurfaceScene, xrcamera.cameraR);
 
           xrrenderer.setRenderTarget(null);
         }
