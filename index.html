@@ -20,6 +20,7 @@ for alternative installations -->
     <script src="https://unpkg.com/three@0.139.2/examples/js/controls/OrbitControls.js"></script>
     <script src="https://unpkg.com/three@0.139.2/examples/js/controls/DragControls.js"></script>
     <script src="https://unpkg.com/three@0.139.2/examples/js/geometries/TeapotGeometry.js"></script>
+    <script src="https://unpkg.com/three@0.139.2/examples/js/loaders/GLTFLoader.js"></script>
 
     <script type="module">
       import { VRButton } from "https://unpkg.com/three@0.139.2/examples/jsm/webxr/VRButton.js";
@@ -94,6 +95,7 @@ for alternative installations -->
       var eyeCenter, eyeScene;
       var orbitControl;
       var showScene = true;
+      var gltfLoader = new THREE.GLTFLoader();
 
       function addDragControlToObjects() {
         var objects = [];
@@ -186,6 +188,37 @@ for alternative installations -->
         teapot.name = "Teapot";
         teapot.position.z -= 70;
         scene.add(teapot);
+
+        
+        gltfLoader.load("./assets/table/scene.gltf", function(gltf) {
+          const model = gltf.scene;
+
+          model.position.set(0,-110, -70);
+          model.scale.set(0.4, 0.4, 0.4);
+
+          scene.add(model);
+        })
+
+
+        gltfLoader.load("./assets/godzilla/scene.gltf", function(gltf) {
+          const model = gltf.scene;
+
+          model.position.set(-100,-150, 0);
+          model.rotation.set(0, -45, 0);
+          model.scale.set(3, 3,3);
+
+          scene.add(model);
+        })
+
+        gltfLoader.load("./assets/kingkong/scene.gltf", function(gltf) {
+          const model = gltf.scene;
+
+          model.position.set(100, -150, 0);
+          model.rotation.set(0, -45, 0);
+          model.scale.set(70, 70, 70);
+
+          scene.add(model);
+        })
 
         createLights(scene);
       }
@@ -336,9 +369,9 @@ for alternative installations -->
         return cam;
       }
 
+      xrrenderer = new THREE.WebGLRenderer({ antialias: true });
+
       function enableVR() {
-        xrrenderer = new THREE.WebGLRenderer({ antialias: true });
-        xrrenderer.setRenderTarget();
         xrrenderer.setPixelRatio(window.devicePixelRatio);
         xrrenderer.setSize(window.innerWidth, window.innerHeight);
         xrrenderer.setAnimationLoop(animateVR);
@@ -346,20 +379,32 @@ for alternative installations -->
         xrrenderer.xr.enabled = true;
         xrrenderer.xr.cameraAutoUpdate = false;
 
-        xrcamera = new THREE.StereoCamera();
-        xrcamera.cameraL.focalLength = 10;
-        xrcamera.cameraR.focalLength = 10;
+        document.body.appendChild(xrrenderer.domElement);
+
+        xrcamera =[new THREE.PerspectiveCamera( 75,
+          window.innerWidth / window.innerHeight,
+          0.1,
+          10000), new THREE.PerspectiveCamera( 75,
+          window.innerWidth / window.innerHeight,
+          0.1,
+          10000)];
+
+        // xrcamera.position.set(100, 100, 300);
+        // xrcamera.lookAt(0, 0, 0);
+
+        // xrcamera.cameraL.focalLength = 10;
+        // xrcamera.cameraR.focalLength = 10;
       }
 
       var animateVR = function () {
         if (xrrenderer != null) {
-          xrcamera.cameraL.position.set(getLeftEyePosition());
-          xrcamera.cameraR.position.set(getRightEyePosition());
+          xrcamera[0].position.set(getLeftEyePosition());
+          // xrcamera[1].position.set(getRightEyePosition());
 
-          xrrenderer.xr.updateCamera(xrcamera);
+          xrrenderer.xr.updateCamera(xrcamera[0]);
+          // xrrenderer.xr.updateCamera(xrcamera[1]);
 
           var gl = xrrenderer.getContext();
-          // requestAnimationFrame(animate);
 
           // 1. render scene objects
           xrrenderer.setClearColor(0x808080);
@@ -393,15 +438,33 @@ for alternative installations -->
           }
 
           // restore state
+          // xrrenderer.setRenderTarget(xrrenderer.getRenderTarget().left);
           xrrenderer.setRenderTarget(xrrenderer.getRenderTarget());
-          xrrenderer.setClearColor(0x000000);
-          xrrenderer.render(displaySurfaceScene, xrcamera);
+
+          xrrenderer.setClearColor(0x404040);
+          // // xrrenderer.render(displaySurfaceScene, xrcamera);
+          // xrrenderer.render(scene, xrcamera);
 
           // xrrenderer.setRenderTarget(xrrenderer.getRenderTarget().right);
-          // xrrenderer.setClearColor(0x000000);
+          // xrrenderer.setClearColor(0xAA0000);
           // xrrenderer.render(displaySurfaceScene, xrcamera.cameraR);
 
-          xrrenderer.setRenderTarget(null);
+          // const size = new THREE.Vector2();
+          // xrrenderer.getSize(size);
+
+          xrrenderer.clear();
+          // xrrenderer.setScissorTest( true );
+
+          // xrrenderer.setScissor(0, 0, size.width / 2, size.height);
+          // xrrenderer.setViewport(0, 0, size.width / 2, size.height);
+          // xrrenderer.render( scene, xrcamera[0] );
+          xrrenderer.render( scene , xrcamera[0] );
+
+          // xrrenderer.setScissor(size.width / 2, 0, size.width / 2, size.height);
+          // xrrenderer.setViewport(size.width / 2, 0, size.width / 2, size.height);
+          // xrrenderer.render( scene, xrcamera[1]);
+
+          renderer.setScissorTest(false);
         }
       };
       // refresh function
@@ -488,6 +551,7 @@ for alternative installations -->
       vrbutton.addEventListener("click", enableVR);
       document.body.appendChild(vrbutton);
 
+      // enableVR();
       createRenderer(); // create WebGL renderer
       createDisplaySurfaces(); // Display surfaces
       createDisplaySurfaceTargets(); // Textures for the display surfaces
@@ -497,7 +561,7 @@ for alternative installations -->
       createCamera(); // a third-person camera
       enableOrbitCamera(camera, renderer); // basic camera control
       addDragControlToObjects(); // allow some objects to be dragged
-      animateVR();
+      // animateVR();
       animate();
     </script>
   </body>
