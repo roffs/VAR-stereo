@@ -364,13 +364,13 @@ for alternative installations -->
           // 1. render scene objects
           xrrenderer.setClearColor(0x808080);
           xrrenderer.clear();
-          if (showScene) xrrenderer.render(scene, xrcamera);
+          // if (showScene) xrrenderer.render(scene, xrcamera);
 
           // 2. render scene objects onto a texture, for each target
           for (let [index, displaySurface] of displaySurfaces.entries()) {
-            xrrenderer.setRenderTarget(displaySurfaceTargets[index]);
-            xrrenderer.setClearColor(0x404040);
-            xrrenderer.clear();
+            renderer.setRenderTarget(displaySurfaceTargets[index]);
+            renderer.setClearColor(0x404040);
+            renderer.clear();
 
             // left eye on RED channel
             gl.colorMask(1, 0, 0, 0);
@@ -378,7 +378,7 @@ for alternative installations -->
             var view = displaySurface.viewMatrix(eye);
             var proj = displaySurface.projectionMatrix(eye, 1, 10000);
             var leftCamera = cameraFromViewProj(view, proj);
-            xrrenderer.render(scene, leftCamera);
+            renderer.render(scene, leftCamera);
 
             // right eye on GREEN, BLUE channels
             gl.colorMask(0, 1, 1, 0);
@@ -386,10 +386,8 @@ for alternative installations -->
             var view = displaySurface.viewMatrix(eye);
             var proj = displaySurface.projectionMatrix(eye, 1, 10000);
             var rightCamera = cameraFromViewProj(view, proj);
-            xrrenderer.clearDepth();
-            xrrenderer.render(scene, rightCamera);
-
-            var xrCamera = [leftCamera, rightCamera];
+            renderer.clearDepth();
+            renderer.render(scene, rightCamera);
 
             gl.colorMask(1, 1, 1, 0);
           }
@@ -404,13 +402,6 @@ for alternative installations -->
           xrrenderer.render(displaySurfaceScene, xrcamera.cameraR);
 
           xrrenderer.setRenderTarget(null);
-          // // 3. render display surfaces as (textured) quads
-          // renderer.render(displaySurfaceScene, camera);
-
-          // // 4. render eyes
-          // renderer.render(eyeScene, camera);
-
-          // xrcamera.update(renderer);
         }
       };
       // refresh function
