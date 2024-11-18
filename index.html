@@ -21,7 +21,9 @@ for alternative installations -->
     <script src="https://unpkg.com/three@0.139.2/examples/js/controls/DragControls.js"></script>
     <script src="https://unpkg.com/three@0.139.2/examples/js/geometries/TeapotGeometry.js"></script>
 
-    <script>
+    <script type="module">
+      import { VRButton } from "https://unpkg.com/three@0.139.2/examples/jsm/webxr/VRButton.js";
+
       class DisplaySurface {
         constructor(name, origin, u_vector, v_vector) {
           this.name = name;
@@ -87,6 +89,7 @@ for alternative installations -->
       }
 
       var renderer, scene, camera;
+      var xrrenderer, xrcamera;
       var displaySurfaces, displaySurfaceScene, displaySurfaceTargets;
       var eyeCenter, eyeScene;
       var orbitControl;
@@ -333,10 +336,35 @@ for alternative installations -->
         return cam;
       }
 
-      // refresh function
-      var animate = function () {
+      function enableVR() {
+        document.body.appendChild(VRButton.createButton(xrrenderer));
+
+        xrrenderer = new THREE.WebGLRenderer({ antialias: true });
+        xrrenderer.setRenderTarget();
+        xrrenderer.setPixelRatio(window.devicePixelRatio);
+        xrrenderer.setSize(window.innerWidth, window.innerHeight);
+        xrrenderer.setAnimationLoop(animate);
+        xrrenderer.shadowMap.enabled = true;
+        xrrenderer.xr.enabled = true;
+        xrrenderer.xr.cameraAutoUpdate = false;
+
+        xrcamera = new THREE.StereoCamera();
+        xrcamera.cameraL.focalLength = 10;
+        xrcamera.cameraR.focalLength = 10;
+      }
+
+      var animateVR = function* () {
+        // const delta = clock.getDelta();
+        // const elapsedTime = clock.elapsedTime;
+        // world.execute(delta, elapsedTime);
+
+        xrcamera.cameraL.position.set(getLeftEyePosition());
+        xrcamera.cameraR.position.set(getRightEyePosition());
+
+        renderer.xr.updateCamera(xrcamera);
+
         var gl = renderer.getContext();
-        requestAnimationFrame(animate);
+        // requestAnimationFrame(animate);
 
         // 1. render scene objects
         renderer.setClearColor(0x808080);
@@ -366,17 +394,94 @@ for alternative installations -->
           renderer.clearDepth();
           renderer.render(scene, rightCamera);
 
+          var xrCamera = [leftCamera, rightCamera];
+
           gl.colorMask(1, 1, 1, 0);
         }
+
         // restore state
-        renderer.setRenderTarget(null);
+        console.log(renderer.getRenderTarget());
+        renderer.setRenderTarget(renderer.getRenderTarget().left);
         renderer.setClearColor(0x000000);
+        renderer.render(displaySurfaceScene, xrcamera.cameraL);
 
-        // 3. render display surfaces as (textured) quads
-        renderer.render(displaySurfaceScene, camera);
+        renderer.setRenderTarget(renderer.getRenderTarget().right);
+        renderer.setClearColor(0x000000);
+        renderer.render(displaySurfaceScene, xrcamera.cameraR);
 
-        // 4. render eyes
-        renderer.render(eyeScene, camera);
+        renderer.setRenderTarget(null);
+        // // 3. render display surfaces as (textured) quads
+        // renderer.render(displaySurfaceScene, camera);
+
+        // // 4. render eyes
+        // renderer.render(eyeScene, camera);
+
+        // xrcamera.update(renderer);
+      };
+      // refresh function
+      var animate = function () {
+        // const delta = clock.getDelta();
+        // const elapsedTime = clock.elapsedTime;
+        // world.execute(delta, elapsedTime);
+
+        xrcamera.cameraL.position.set(getLeftEyePosition());
+        xrcamera.cameraR.position.set(getRightEyePosition());
+
+        renderer.xr.updateCamera(xrcamera);
+
+        var gl = renderer.getContext();
+        // requestAnimationFrame(animate);
+
+        // 1. render scene objects
+        renderer.setClearColor(0x808080);
+        renderer.clear();
+        if (showScene) renderer.render(scene, camera);
+
+        // 2. render scene objects onto a texture, for each target
+        // for (let [index, displaySurface] of displaySurfaces.entries()) {
+        //   renderer.setRenderTarget(displaySurfaceTargets[index]);
+        //   renderer.setClearColor(0x404040);
+        //   renderer.clear();
+
+        //   // left eye on RED channel
+        //   gl.colorMask(1, 0, 0, 0);
+        //   var eye = getLeftEyePosition();
+        //   var view = displaySurface.viewMatrix(eye);
+        //   var proj = displaySurface.projectionMatrix(eye, 1, 10000);
+        //   var leftCamera = cameraFromViewProj(view, proj);
+        //   renderer.render(scene, leftCamera);
+
+        //   // right eye on GREEN, BLUE channels
+        //   gl.colorMask(0, 1, 1, 0);
+        //   var eye = getRightEyePosition();
+        //   var view = displaySurface.viewMatrix(eye);
+        //   var proj = displaySurface.projectionMatrix(eye, 1, 10000);
+        //   var rightCamera = cameraFromViewProj(view, proj);
+        //   renderer.clearDepth();
+        //   renderer.render(scene, rightCamera);
+
+        //   var xrCamera = [leftCamera, rightCamera];
+
+        //   gl.colorMask(1, 1, 1, 0);
+        // }
+        // restore state
+        console.log(renderer.getRenderTarget());
+        renderer.setRenderTarget(renderer.getRenderTarget().left);
+        renderer.setClearColor(0x000000);
+        renderer.render(displaySurfaceScene, xrcamera.cameraL);
+
+        renderer.setRenderTarget(renderer.getRenderTarget().right);
+        renderer.setClearColor(0x000000);
+        renderer.render(displaySurfaceScene, xrcamera.cameraR);
+
+        renderer.setRenderTarget(null);
+        // // 3. render display surfaces as (textured) quads
+        // renderer.render(displaySurfaceScene, camera);
+
+        // // 4. render eyes
+        // renderer.render(eyeScene, camera);
+
+        // xrcamera.update(renderer);
       };
 
       window.addEventListener("keydown", function (event) {
@@ -414,6 +519,7 @@ for alternative installations -->
       });
 
       createRenderer(); // create WebGL renderer
+      enableVR();
       createDisplaySurfaces(); // Display surfaces
       createDisplaySurfaceTargets(); // Textures for the display surfaces
       createDisplaySurfaceScene(); // 3D objects for the display surfaces
@@ -422,6 +528,7 @@ for alternative installations -->
       createCamera(); // a third-person camera
       enableOrbitCamera(camera, renderer); // basic camera control
       addDragControlToObjects(); // allow some objects to be dragged
+      animateVR();
       animate();
     </script>
   </body>
