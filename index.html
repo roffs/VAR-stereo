@@ -364,7 +364,7 @@ for alternative installations -->
           // 1. render scene objects
           xrrenderer.setClearColor(0x808080);
           xrrenderer.clear();
-          if (showScene) xrrenderer.render(scene, camera);
+          if (showScene) xrrenderer.render(scene, xrcamera);
 
           // 2. render scene objects onto a texture, for each target
           for (let [index, displaySurface] of displaySurfaces.entries()) {
