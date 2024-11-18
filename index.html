@@ -341,7 +341,7 @@ for alternative installations -->
         xrrenderer.setRenderTarget();
         xrrenderer.setPixelRatio(window.devicePixelRatio);
         xrrenderer.setSize(window.innerWidth, window.innerHeight);
-        xrrenderer.setAnimationLoop(animate);
+        xrrenderer.setAnimationLoop(animateVR);
         xrrenderer.shadowMap.enabled = true;
         xrrenderer.xr.enabled = true;
         xrrenderer.xr.cameraAutoUpdate = false;
@@ -353,10 +353,6 @@ for alternative installations -->
 
       var animateVR = function () {
         if (xrrenderer != null) {
-          // const delta = clock.getDelta();
-          // const elapsedTime = clock.elapsedTime;
-          // world.execute(delta, elapsedTime);
-
           xrcamera.cameraL.position.set(getLeftEyePosition());
           xrcamera.cameraR.position.set(getRightEyePosition());
 
