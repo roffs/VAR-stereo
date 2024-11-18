@@ -356,21 +356,21 @@ for alternative installations -->
           xrcamera.cameraL.position.set(getLeftEyePosition());
           xrcamera.cameraR.position.set(getRightEyePosition());
 
-          renderer.xr.updateCamera(xrcamera);
+          xrrenderer.xr.updateCamera(xrcamera);
 
-          var gl = renderer.getContext();
+          var gl = xrrenderer.getContext();
           // requestAnimationFrame(animate);
 
           // 1. render scene objects
-          renderer.setClearColor(0x808080);
-          renderer.clear();
-          if (showScene) renderer.render(scene, camera);
+          xrrenderer.setClearColor(0x808080);
+          xrrenderer.clear();
+          if (showScene) xrrenderer.render(scene, camera);
 
           // 2. render scene objects onto a texture, for each target
           for (let [index, displaySurface] of displaySurfaces.entries()) {
-            renderer.setRenderTarget(displaySurfaceTargets[index]);
-            renderer.setClearColor(0x404040);
-            renderer.clear();
+            xrrenderer.setRenderTarget(displaySurfaceTargets[index]);
+            xrrenderer.setClearColor(0x404040);
+            xrrenderer.clear();
 
             // left eye on RED channel
             gl.colorMask(1, 0, 0, 0);
@@ -378,7 +378,7 @@ for alternative installations -->
             var view = displaySurface.viewMatrix(eye);
             var proj = displaySurface.projectionMatrix(eye, 1, 10000);
             var leftCamera = cameraFromViewProj(view, proj);
-            renderer.render(scene, leftCamera);
+            xrrenderer.render(scene, leftCamera);
 
             // right eye on GREEN, BLUE channels
             gl.colorMask(0, 1, 1, 0);
@@ -386,8 +386,8 @@ for alternative installations -->
             var view = displaySurface.viewMatrix(eye);
             var proj = displaySurface.projectionMatrix(eye, 1, 10000);
             var rightCamera = cameraFromViewProj(view, proj);
-            renderer.clearDepth();
-            renderer.render(scene, rightCamera);
+            xrrenderer.clearDepth();
+            xrrenderer.render(scene, rightCamera);
 
             var xrCamera = [leftCamera, rightCamera];
 
@@ -396,15 +396,15 @@ for alternative installations -->
 
           // restore state
           console.log(renderer.getRenderTarget());
-          renderer.setRenderTarget(renderer.getRenderTarget().left);
-          renderer.setClearColor(0x000000);
-          renderer.render(displaySurfaceScene, xrcamera.cameraL);
+          xrrenderer.setRenderTarget(renderer.getRenderTarget().left);
+          xrrenderer.setClearColor(0x000000);
+          xrrenderer.render(displaySurfaceScene, xrcamera.cameraL);
 
-          renderer.setRenderTarget(renderer.getRenderTarget().right);
-          renderer.setClearColor(0x000000);
-          renderer.render(displaySurfaceScene, xrcamera.cameraR);
+          xrrenderer.setRenderTarget(renderer.getRenderTarget().right);
+          xrrenderer.setClearColor(0x000000);
+          xrrenderer.render(displaySurfaceScene, xrcamera.cameraR);
 
-          renderer.setRenderTarget(null);
+          xrrenderer.setRenderTarget(null);
           // // 3. render display surfaces as (textured) quads
           // renderer.render(displaySurfaceScene, camera);
 
