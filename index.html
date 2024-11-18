@@ -395,12 +395,11 @@ for alternative installations -->
           }
 
           // restore state
-          console.log(renderer.getRenderTarget());
-          xrrenderer.setRenderTarget(renderer.getRenderTarget().left);
+          xrrenderer.setRenderTarget(xrrenderer.getRenderTarget().left);
           xrrenderer.setClearColor(0x000000);
           xrrenderer.render(displaySurfaceScene, xrcamera.cameraL);
 
-          xrrenderer.setRenderTarget(renderer.getRenderTarget().right);
+          xrrenderer.setRenderTarget(xrrenderer.getRenderTarget().right);
           xrrenderer.setClearColor(0x000000);
           xrrenderer.render(displaySurfaceScene, xrcamera.cameraR);
 
